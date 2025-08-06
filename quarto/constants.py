@@ -12,6 +12,3 @@ NO_BITS_SET = 0  # 0000
 
 # Win condition constants
 PIECES_FOR_WIN = EDGE_SIZE  # 4 pieces in a line to win
-
-# Piece format modes
-PIECE_FORMAT_MODES = ("binary", "decimal") 

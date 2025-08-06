@@ -59,7 +59,6 @@ class TestGameState:
         assert len(game_state.board) == 4
         assert len(game_state.board[0]) == 4
         assert game_state.piece_format_mode == PieceFormatMode.DECIMAL
-        assert game_state.turn_phase == "select_piece"
 
     def test_select_piece(self, game_state: GameState) -> None:
         game_state.select_piece(3)

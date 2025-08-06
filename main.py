@@ -1,5 +1,4 @@
 from quarto.game_setup import GameEngine
-from quarto.constants import PIECE_FORMAT_MODES
 
 def main() -> None:
     game_engine = GameEngine()

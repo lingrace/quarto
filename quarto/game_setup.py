@@ -39,7 +39,6 @@ class GameState:
         # Note that keeping the board state is not necessary to check the win conditions. We retain the board purely for display purposes.
         self.board: List[List[Optional[int]]] = [[None for _ in range(EDGE_SIZE)] for _ in range(EDGE_SIZE)]  
         self.current_player: Literal["player_1", "player_2"] = "player_1" 
-        self.turn_phase: Literal["place_piece", "select_piece"] = "select_piece"
         self.selected_piece: Optional[int] = None 
         self.columns_data: List[LineData] = [LineData() for _ in range(EDGE_SIZE)]
         self.rows_data: List[LineData] = [LineData() for _ in range(EDGE_SIZE)]
@@ -107,6 +106,7 @@ class GameState:
     def print_available_pieces(self) -> None:
         print("Available pieces:", ", ".join(self.format_piece(i) for i in range(NUM_PIECES) if self.pieces[i] == 0))
 
+    # for debug usage
     def dump_line_data(self) -> None:
         for i, line_data in enumerate(self.columns_data):
             print(f"Column {i}: {format(line_data.cumulative_bit_and, '04b')}, {format(line_data.cumulative_bit_or, '04b')}, pieces: {line_data.number_of_pieces}")
