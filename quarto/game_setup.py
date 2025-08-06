@@ -38,6 +38,8 @@ class GameState:
         self.pieces: bitarray = bitarray(NUM_PIECES)
         # Note that keeping the board state is not necessary to check the win conditions. We retain the board purely for display purposes.
         self.board: List[List[Optional[int]]] = [[None for _ in range(EDGE_SIZE)] for _ in range(EDGE_SIZE)]  
+
+        # Make player an enum here, so it can be re-used between here and winner
         self.current_player: Literal["player_1", "player_2"] = "player_1" 
         self.selected_piece: Optional[int] = None 
         self.columns_data: List[LineData] = [LineData() for _ in range(EDGE_SIZE)]
@@ -107,6 +109,7 @@ class GameState:
         print("Available pieces:", ", ".join(self.format_piece(i) for i in range(NUM_PIECES) if self.pieces[i] == 0))
 
     # for debug usage
+    # Consider implementing __repr__, or a debug method on each class (particularly LineData)
     def dump_line_data(self) -> None:
         for i, line_data in enumerate(self.columns_data):
             print(f"Column {i}: {format(line_data.cumulative_bit_and, '04b')}, {format(line_data.cumulative_bit_or, '04b')}, pieces: {line_data.number_of_pieces}")
@@ -125,6 +128,7 @@ class GameEngine:
             if self.game_state.piece_format_mode == PieceFormatMode.DECIMAL:
                 piece_index = int(selected_piece)
             else:  # binary mode
+                # Change this to be explicit about checking the PieceFormatMode
                 self._validate_binary_format(selected_piece)
                 piece_index = int(selected_piece, 2)
         except ValueError:
@@ -168,6 +172,7 @@ class GameEngine:
         return PieceFormatMode.BINARY if mode == "binary" else PieceFormatMode.DECIMAL
         
     def print_game_instructions(self) -> None:
+        # Put this in a docstring, make it a constant
         print("Welcome to Quarto!")
         print("Quarto is a 2 player game where each player takes turns placing a piece on the board.")
         print("There are 16 pieces, each with a unique combination of 4 properties: height, color, shape, and number of holes.")
@@ -187,8 +192,8 @@ class GameEngine:
         print("You will be asked to choose your preferred format when setting up the game.")
         print("To set up this game, enter the names of the players.")
 
-
     def select_piece(self) -> None:
+        # make private
         while True:
             try:
                 self.game_state.print_available_pieces()
@@ -200,7 +205,6 @@ class GameEngine:
                 break
             except ValueError as e:
                 print(e)
-                
 
     def place_piece(self) -> None:
         while True:
@@ -210,11 +214,13 @@ class GameEngine:
                 col_input = input(f"[{self.game_state.get_current_player_name()}] Place piece in column (0-{EDGE_SIZE-1}): ")
                 
                 row, col = self._validate_piece_placement(row_input, col_input)
-                self.game_state.place_piece(row, col)
-                self.game_state.print_board()
                 break
             except ValueError as e:
                 print(e)
+
+        # Move this here to make it clear that we're not trying to catch exceptions from here
+        self.game_state.place_piece(row, col)
+        self.game_state.print_board()
 
     def start_game(self, player_1_name: str, player_2_name: str) -> None:
         while True:
