@@ -79,8 +79,8 @@ class TestGameState:
     def test_switch_player(self, game_state: GameState) -> None:
         assert game_state.current_player == Player.PLAYER_1
         game_state.switch_player()
-        assert game_state.current_player == Player.PLAYER_2
-        game_state.switch_player()
+        assert game_state.current_player == Player.PLAYER_2 # type: ignore[comparison-overlap]
+        game_state.switch_player() # type: ignore[unreachable]
         assert game_state.current_player == Player.PLAYER_1
 
     def test_stalemate(self, game_state: GameState) -> None:
@@ -127,24 +127,24 @@ class TestGameState:
         game_state.switch_player()
         assert game_state.get_current_player_name() == "Bob"
 
-    def test_format_piece_decimal(self, game_state):
+    def test_format_piece_decimal(self, game_state: GameState) -> None:
         assert game_state.format_piece(0) == "0"
         assert game_state.format_piece(15) == "15"
 
-    def test_format_piece_binary(self):
+    def test_format_piece_binary(self) -> None:
         game_state = GameState("Alice", "Bob", PieceFormatMode.BINARY)
         assert game_state.format_piece(0) == "0000"
         assert game_state.format_piece(15) == "1111"
         assert game_state.format_piece(1) == "0001"
 
-    def test_winning_diagonal(self, game_state):
+    def test_winning_diagonal(self, game_state: GameState) -> None:
         # Test winning on main diagonal
         for i in range(4):
             game_state.select_piece(1)  # Same piece for all positions
             game_state.place_piece(i, i)
         assert game_state.winner == Player.PLAYER_1
 
-    def test_winning_anti_diagonal(self, game_state):
+    def test_winning_anti_diagonal(self, game_state: GameState) -> None:
         # Test winning on anti-diagonal
         for i in range(4):
             game_state.select_piece(1)  # Same piece for all positions
@@ -153,10 +153,10 @@ class TestGameState:
 
 class TestGameEngine:
     @pytest.fixture
-    def engine(self):
+    def engine(self) -> GameEngine:
         return GameEngine()
 
-    def test_init_game_state(self, engine):
+    def test_init_game_state(self, engine: GameEngine) -> None:
         # Mock the input to avoid stdin issues in tests
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
@@ -167,14 +167,14 @@ class TestGameEngine:
         assert engine.game_state.player_2_name == "Bob"
         assert engine.game_state.piece_format_mode == PieceFormatMode.DECIMAL
 
-    def test_init_game_state_binary_mode(self, engine):
+    def test_init_game_state_binary_mode(self, engine: GameEngine) -> None:
         # Mock the input to avoid stdin issues in tests
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "binary")
             engine._init_game_state("Alice", "Bob")
         assert engine.game_state.piece_format_mode == PieceFormatMode.BINARY
 
-    def test_init_game_state_only_once(self, engine):
+    def test_init_game_state_only_once(self, engine: GameEngine) -> None:
         # Mock the input to avoid stdin issues in tests
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
@@ -187,21 +187,21 @@ class TestGameEngine:
         assert engine.game_state.player_2_name == "Bob"
         assert engine.game_state.piece_format_mode == PieceFormatMode.DECIMAL
 
-    def test_print_game_instructions(self, engine):
+    def test_print_game_instructions(self, engine: GameEngine) -> None:
         # Just check that it runs without error
         engine.print_game_instructions()
 
-    def test_initial_game_state(self, engine):
+    def test_initial_game_state(self, engine: GameEngine) -> None:
         assert not engine.game_started
 
-    def test_validate_piece_format_mode(self, engine):
+    def test_validate_piece_format_mode(self, engine: GameEngine) -> None:
         # Test the validation method for piece format modes
         assert engine._validate_piece_format_mode("binary") == PieceFormatMode.BINARY
         assert engine._validate_piece_format_mode("decimal") == PieceFormatMode.DECIMAL
         assert engine._validate_piece_format_mode("BINARY") == PieceFormatMode.BINARY
         assert engine._validate_piece_format_mode("DECIMAL") == PieceFormatMode.DECIMAL
 
-    def test_validate_piece_format_mode_invalid(self, engine):
+    def test_validate_piece_format_mode_invalid(self, engine: GameEngine) -> None:
         # Test invalid piece format modes
         with pytest.raises(ValueError, match="Invalid piece format mode"):
             engine._validate_piece_format_mode("hex")
@@ -212,7 +212,7 @@ class TestGameEngine:
         with pytest.raises(ValueError, match="Invalid piece format mode"):
             engine._validate_piece_format_mode("   ")
 
-    def test_validate_piece_input_valid(self, engine):
+    def test_validate_piece_input_valid(self, engine: GameEngine) -> None:
         # Test valid piece inputs
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
@@ -221,7 +221,7 @@ class TestGameEngine:
         assert engine._validate_piece_input("15") == 15
         assert engine._validate_piece_input("7") == 7
 
-    def test_validate_piece_input_invalid_format(self, engine):
+    def test_validate_piece_input_invalid_format(self, engine: GameEngine) -> None:
         # Test invalid piece input formats
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
@@ -233,7 +233,7 @@ class TestGameEngine:
         with pytest.raises(ValueError, match="Selected piece was an invalid format"):
             engine._validate_piece_input("16.5")
 
-    def test_validate_piece_input_out_of_range(self, engine):
+    def test_validate_piece_input_out_of_range(self, engine: GameEngine) -> None:
         # Test piece inputs out of valid range
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
@@ -245,7 +245,7 @@ class TestGameEngine:
         with pytest.raises(ValueError, match="Piece 20 is out of range"):
             engine._validate_piece_input("20")
 
-    def test_validate_piece_input_already_used(self, engine):
+    def test_validate_piece_input_already_used(self, engine: GameEngine) -> None:
         # Test selecting a piece that's already been used
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
@@ -255,14 +255,14 @@ class TestGameEngine:
         with pytest.raises(ValueError, match="Piece 5 has already been used"):
             engine._validate_piece_input("5")
 
-    def test_validate_binary_format_valid(self, engine):
+    def test_validate_binary_format_valid(self, engine: GameEngine) -> None:
         # Test valid binary format inputs
         engine._validate_binary_format("0000")
         engine._validate_binary_format("0001")
         engine._validate_binary_format("1111")
         engine._validate_binary_format("1010")
 
-    def test_validate_binary_format_invalid(self, engine):
+    def test_validate_binary_format_invalid(self, engine: GameEngine) -> None:
         # Test invalid binary format inputs
         with pytest.raises(ValueError, match="Invalid binary format"):
             engine._validate_binary_format("0002")
@@ -274,7 +274,7 @@ class TestGameEngine:
         # (all(bit in '01' for bit in "") returns True)
         engine._validate_binary_format("")
 
-    def test_validate_piece_placement_valid(self, engine):
+    def test_validate_piece_placement_valid(self, engine: GameEngine) -> None:
         # Test valid piece placement inputs
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
@@ -283,7 +283,7 @@ class TestGameEngine:
         assert engine._validate_piece_placement("3", "3") == (3, 3)
         assert engine._validate_piece_placement("1", "2") == (1, 2)
 
-    def test_validate_piece_placement_invalid_format(self, engine):
+    def test_validate_piece_placement_invalid_format(self, engine: GameEngine) -> None:
         # Test invalid placement input formats
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
@@ -297,7 +297,7 @@ class TestGameEngine:
         with pytest.raises(ValueError, match="Invalid input. Please enter a valid integer"):
             engine._validate_piece_placement("0", "")
 
-    def test_validate_piece_placement_out_of_range(self, engine):
+    def test_validate_piece_placement_out_of_range(self, engine: GameEngine) -> None:
         # Test placement inputs out of valid range
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
@@ -313,7 +313,7 @@ class TestGameEngine:
         with pytest.raises(ValueError, match="Invalid row or column: 5, 5"):
             engine._validate_piece_placement("5", "5")
 
-    def test_validate_piece_placement_already_occupied(self, engine):
+    def test_validate_piece_placement_already_occupied(self, engine: GameEngine) -> None:
         # Test placing a piece in an already occupied position
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
@@ -323,7 +323,7 @@ class TestGameEngine:
         with pytest.raises(ValueError, match="Position \\(1, 2\\) is already occupied"):
             engine._validate_piece_placement("1", "2")
 
-    def test_game_state_invalid_piece_placement(self, engine):
+    def test_game_state_invalid_piece_placement(self, engine: GameEngine) -> None:
         # Test placing a piece without selecting one first
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
