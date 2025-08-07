@@ -1,7 +1,7 @@
 ## generated unit tests for game_setup.py using pytest
 import pytest
 from typing import Literal
-from quarto.game_setup import LineData, GameState, GameEngine, PieceFormatMode
+from quarto.game_setup import LineData, GameState, GameEngine, PieceFormatMode, Player
 
 class TestLineData:
     @pytest.fixture
@@ -52,7 +52,7 @@ class TestGameState:
     def test_initial_state(self, game_state: GameState) -> None:
         assert game_state.player_1_name == "Alice"
         assert game_state.player_2_name == "Bob"
-        assert game_state.current_player == "player_1"
+        assert game_state.current_player == Player.PLAYER_1
         assert game_state.selected_piece is None
         assert game_state.winner is None
         assert game_state.pieces.count(1) == 0
@@ -72,17 +72,16 @@ class TestGameState:
             game_state.place_piece(0, col)
             if col < 3:
                 game_state.selected_piece = 1  # Simulate always placing the same piece
-        assert game_state.winner == "player_1"
+        assert game_state.winner == Player.PLAYER_1
         assert game_state.is_game_over()
         assert not game_state.is_stalemate()
 
     def test_switch_player(self, game_state: GameState) -> None:
-        assert game_state.current_player == "player_1"
+        assert game_state.current_player == Player.PLAYER_1
         game_state.switch_player()
-        current_player: Literal["player_1", "player_2"] = game_state.current_player
-        assert current_player == "player_2"
+        assert game_state.current_player == Player.PLAYER_2
         game_state.switch_player()
-        assert game_state.current_player == "player_1"
+        assert game_state.current_player == Player.PLAYER_1
 
     def test_stalemate(self, game_state: GameState) -> None:
         # Fill the board without a winner by carefully choosing pieces
@@ -143,14 +142,14 @@ class TestGameState:
         for i in range(4):
             game_state.select_piece(1)  # Same piece for all positions
             game_state.place_piece(i, i)
-        assert game_state.winner == "player_1"
+        assert game_state.winner == Player.PLAYER_1
 
     def test_winning_anti_diagonal(self, game_state):
         # Test winning on anti-diagonal
         for i in range(4):
             game_state.select_piece(1)  # Same piece for all positions
             game_state.place_piece(i, 3-i)
-        assert game_state.winner == "player_1"
+        assert game_state.winner == Player.PLAYER_1
 
 class TestGameEngine:
     @pytest.fixture

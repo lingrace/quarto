@@ -3,7 +3,7 @@ from bitarray import bitarray
 from enum import Enum
 from .constants import (
     EDGE_SIZE, NUM_PIECES, NUM_PROPERTIES, NUM_DIAGONALS,
-    ALL_BITS_SET, NO_BITS_SET, PIECES_FOR_WIN
+    ALL_BITS_SET, NO_BITS_SET, PIECES_FOR_WIN, INSTRUCTIONS
 )
 
 # See technical design notes in README.md
@@ -12,6 +12,10 @@ from .constants import (
 class PieceFormatMode(Enum):
     BINARY = "binary"
     DECIMAL = "decimal"
+
+class Player(Enum):
+    PLAYER_1 = 1
+    PLAYER_2 = 2
 
 class LineData:
     def __init__(self) -> None:
@@ -40,16 +44,16 @@ class GameState:
         self.board: List[List[Optional[int]]] = [[None for _ in range(EDGE_SIZE)] for _ in range(EDGE_SIZE)]  
 
         # Make player an enum here, so it can be re-used between here and winner
-        self.current_player: Literal["player_1", "player_2"] = "player_1" 
+        self.current_player: Player =  Player.PLAYER_1
         self.selected_piece: Optional[int] = None 
         self.columns_data: List[LineData] = [LineData() for _ in range(EDGE_SIZE)]
         self.rows_data: List[LineData] = [LineData() for _ in range(EDGE_SIZE)]
         self.diagonals_data: List[LineData] = [LineData() for _ in range(NUM_DIAGONALS)]
-        self.winner: Optional[Literal["player_1", "player_2"]] = None # None if the game is not over, player_1 or player_2 if a player has won
+        self.winner: Optional[Player] = None # None if the game is not over, player_1 or player_2 if a player has won
         self.piece_format_mode = piece_format_mode
     
     def get_current_player_name(self) -> str:
-        return self.player_1_name if self.current_player == "player_1" else self.player_2_name
+        return self.player_1_name if self.current_player == Player.PLAYER_1 else self.player_2_name
 
     def is_game_over(self) -> bool:
         return self.winner is not None or self.pieces.count(1) == NUM_PIECES
@@ -86,10 +90,10 @@ class GameState:
         self.pieces[piece_index] = 1
     
     def switch_player(self) -> None:
-        if self.current_player == "player_1":
-            self.current_player = "player_2"
-        else:
-            self.current_player = "player_1"
+        if self.current_player == Player.PLAYER_1:
+            self.current_player = Player.PLAYER_2
+        elif self.current_player == Player.PLAYER_2:
+            self.current_player = Player.PLAYER_1
     
     def print_board(self) -> None:
         print("Current board:")
@@ -172,25 +176,7 @@ class GameEngine:
         return PieceFormatMode.BINARY if mode == "binary" else PieceFormatMode.DECIMAL
         
     def print_game_instructions(self) -> None:
-        # Put this in a docstring, make it a constant
-        print("Welcome to Quarto!")
-        print("Quarto is a 2 player game where each player takes turns placing a piece on the board.")
-        print("There are 16 pieces, each with a unique combination of 4 properties: height, color, shape, and number of holes.")
-        print("For each of these properties, there are 2 options, e.g. tall or short.")
-        print("The board is a square 4 by 4 grid. At the start of the game, the board is empty.")
-        print("Each piece can be used once and each square can be occupied once.")
-        print("The game is won by creating a line of 4 pieces with that share a common property, e.g. all the pieces in that line are tall.")
-
-        print("The order of play is as follows:")
-        print("1. Player 1 selects a piece")
-        print("2. Player 2 places that piece on the board")
-        print("3. Player 2 selects a piece")
-        print("4. Player 1 places that piece on the board")
-        print("The game continues until a player wins or the board is full.")
-
-        print("Pieces can be displayed in binary (e.g., 0000, 0001, 0010) or decimal (e.g., 0, 1, 2) format.")
-        print("You will be asked to choose your preferred format when setting up the game.")
-        print("To set up this game, enter the names of the players.")
+       print(INSTRUCTIONS)
 
     def select_piece(self) -> None:
         # make private
@@ -218,7 +204,6 @@ class GameEngine:
             except ValueError as e:
                 print(e)
 
-        # Move this here to make it clear that we're not trying to catch exceptions from here
         self.game_state.place_piece(row, col)
         self.game_state.print_board()
 
