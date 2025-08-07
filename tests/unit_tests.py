@@ -157,33 +157,33 @@ class TestGameEngine:
     def engine(self):
         return GameEngine()
 
-    def test_start_game(self, engine):
+    def test_init_game_state(self, engine):
         # Mock the input to avoid stdin issues in tests
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
-            engine.start_game("Alice", "Bob")
+            engine.init_game_state("Alice", "Bob")
         assert engine.game_started
         assert isinstance(engine.game_state, GameState)
         assert engine.game_state.player_1_name == "Alice"
         assert engine.game_state.player_2_name == "Bob"
         assert engine.game_state.piece_format_mode == PieceFormatMode.DECIMAL
 
-    def test_start_game_binary_mode(self, engine):
+    def test_init_game_state_binary_mode(self, engine):
         # Mock the input to avoid stdin issues in tests
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "binary")
-            engine.start_game("Alice", "Bob")
+            engine.init_game_state("Alice", "Bob")
         assert engine.game_state.piece_format_mode == PieceFormatMode.BINARY
 
-    def test_start_game_only_once(self, engine):
+    def test_init_game_state_only_once(self, engine):
         # Mock the input to avoid stdin issues in tests
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
-            engine.start_game("Alice", "Bob")
+            engine.init_game_state("Alice", "Bob")
         # Try to start again with different names
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "binary")
-            engine.start_game("Carol", "Dave")
+            engine.init_game_state("Carol", "Dave")
         assert engine.game_state.player_1_name == "Alice"
         assert engine.game_state.player_2_name == "Bob"
         assert engine.game_state.piece_format_mode == PieceFormatMode.DECIMAL
@@ -217,7 +217,7 @@ class TestGameEngine:
         # Test valid piece inputs
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
-            engine.start_game("Alice", "Bob")
+            engine.init_game_state("Alice", "Bob")
         assert engine._validate_piece_input("0") == 0
         assert engine._validate_piece_input("15") == 15
         assert engine._validate_piece_input("7") == 7
@@ -226,7 +226,7 @@ class TestGameEngine:
         # Test invalid piece input formats
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
-            engine.start_game("Alice", "Bob")
+            engine.init_game_state("Alice", "Bob")
         with pytest.raises(ValueError, match="Selected piece was an invalid format"):
             engine._validate_piece_input("abc")
         with pytest.raises(ValueError, match="Selected piece was an invalid format"):
@@ -238,7 +238,7 @@ class TestGameEngine:
         # Test piece inputs out of valid range
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
-            engine.start_game("Alice", "Bob")
+            engine.init_game_state("Alice", "Bob")
         with pytest.raises(ValueError, match="Piece 16 is out of range"):
             engine._validate_piece_input("16")
         with pytest.raises(ValueError, match="Piece -1 is out of range"):
@@ -250,7 +250,7 @@ class TestGameEngine:
         # Test selecting a piece that's already been used
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
-            engine.start_game("Alice", "Bob")
+            engine.init_game_state("Alice", "Bob")
         # Mark piece 5 as used
         engine.game_state.pieces[5] = 1
         with pytest.raises(ValueError, match="Piece 5 has already been used"):
@@ -279,7 +279,7 @@ class TestGameEngine:
         # Test valid piece placement inputs
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
-            engine.start_game("Alice", "Bob")
+            engine.init_game_state("Alice", "Bob")
         assert engine._validate_piece_placement("0", "0") == (0, 0)
         assert engine._validate_piece_placement("3", "3") == (3, 3)
         assert engine._validate_piece_placement("1", "2") == (1, 2)
@@ -288,7 +288,7 @@ class TestGameEngine:
         # Test invalid placement input formats
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
-            engine.start_game("Alice", "Bob")
+            engine.init_game_state("Alice", "Bob")
         with pytest.raises(ValueError, match="Invalid input. Please enter a valid integer"):
             engine._validate_piece_placement("abc", "0")
         with pytest.raises(ValueError, match="Invalid input. Please enter a valid integer"):
@@ -302,7 +302,7 @@ class TestGameEngine:
         # Test placement inputs out of valid range
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
-            engine.start_game("Alice", "Bob")
+            engine.init_game_state("Alice", "Bob")
         with pytest.raises(ValueError, match="Invalid row or column: -1, 0"):
             engine._validate_piece_placement("-1", "0")
         with pytest.raises(ValueError, match="Invalid row or column: 0, -1"):
@@ -318,7 +318,7 @@ class TestGameEngine:
         # Test placing a piece in an already occupied position
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
-            engine.start_game("Alice", "Bob")
+            engine.init_game_state("Alice", "Bob")
         # Mark position (1, 2) as occupied
         engine.game_state.board[1][2] = 5
         with pytest.raises(ValueError, match="Position \\(1, 2\\) is already occupied"):
@@ -328,7 +328,7 @@ class TestGameEngine:
         # Test placing a piece without selecting one first
         with pytest.MonkeyPatch().context() as m:
             m.setattr('builtins.input', lambda prompt: "decimal")
-            engine.start_game("Alice", "Bob")
+            engine.init_game_state("Alice", "Bob")
         game_state = engine.game_state
         
         with pytest.raises(ValueError, match="No piece selected"):

@@ -222,7 +222,7 @@ class GameEngine:
         self.game_state.place_piece(row, col)
         self.game_state.print_board()
 
-    def start_game(self, player_1_name: str, player_2_name: str) -> None:
+    def init_game_state(self, player_1_name: str, player_2_name: str) -> None:
         while True:
             piece_format_mode_input = input("Enter the format of the pieces (binary or decimal): ").lower().strip()
             try:
@@ -235,7 +235,8 @@ class GameEngine:
             self.game_started = True
             self.game_state = GameState(player_1_name, player_2_name, piece_format_mode)
     
-    def run_game(self) -> None:
+    def run_game(self,  player_1_name: str, player_2_name: str) -> None:
+        self.init_game_state(player_1_name, player_2_name)
         # This game loop follows the lifecycle of a piece, not a player
         while not self.game_state.is_game_over():
             self.select_piece()
