@@ -51,7 +51,12 @@ class GameState:
         self.piece_format_mode = piece_format_mode
     
     def get_current_player_name(self) -> str:
-        return self.player_1_name if self.current_player == Player.PLAYER_1 else self.player_2_name
+        if self.current_player == Player.PLAYER_1:
+            return self.player_1_name
+        elif self.current_player == Player.PLAYER_2:
+            return self.player_2_name
+        else:
+            raise ValueError("Additional players unsupported.")
 
     def is_game_over(self) -> bool:
         return self.winner is not None or self.pieces.count(1) == NUM_PIECES
@@ -105,7 +110,15 @@ class GameState:
     
     
     def format_piece(self, piece_index: int) -> str:
-        return format(piece_index, f'0{NUM_PROPERTIES}b' if self.piece_format_mode == PieceFormatMode.BINARY else 'd')
+        format_str: str
+        if self.piece_format_mode == PieceFormatMode.BINARY:
+            format_str = f'0{NUM_PROPERTIES}b' 
+        elif self.piece_format_mode == PieceFormatMode.DECIMAL:
+            format_str = 'd'
+        else:
+            raise ValueError ("Format mode is unsupported.")
+        
+        return format(piece_index, format_str)
     
     def print_available_pieces(self) -> None:
         print("Available pieces:", ", ".join(self.format_piece(i) for i in range(NUM_PIECES) if self.pieces[i] == 0))
@@ -129,10 +142,11 @@ class GameEngine:
         try:
             if self.game_state.piece_format_mode == PieceFormatMode.DECIMAL:
                 piece_index = int(selected_piece)
-            else:  # binary mode
-                # Change this to be explicit about checking the PieceFormatMode
+            elif self.game_state.piece_format_mode == PieceFormatMode.BINARY:
                 self._validate_binary_format(selected_piece)
                 piece_index = int(selected_piece, 2)
+            else:
+                raise ValueError("Given format mode is unsupported.")
         except ValueError:
             raise ValueError("Selected piece was an invalid format.")
         
@@ -169,10 +183,13 @@ class GameEngine:
 
     def _validate_piece_format_mode(self, mode_input: str) -> PieceFormatMode:
         mode = mode_input.lower().strip()
-        if mode not in ("binary", "decimal"):
+        if mode == "binary":
+            return PieceFormatMode.BINARY
+        elif mode == "decimal":
+            return PieceFormatMode.DECIMAL
+        else:
             raise ValueError(f"Invalid piece format mode '{mode_input}'. Please enter 'binary' or 'decimal'.")
-        return PieceFormatMode.BINARY if mode == "binary" else PieceFormatMode.DECIMAL
-        
+
     def print_game_instructions(self) -> None:
        print(INSTRUCTIONS)
 
