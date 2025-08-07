@@ -23,6 +23,14 @@ class LineData:
         self.cumulative_bit_or: int = NO_BITS_SET    # 0000
         self.number_of_pieces = 0
     
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}("
+            f"cumulative_bit_and={self.cumulative_bit_and:04b}, "
+            f"cumulative_bit_or={self.cumulative_bit_or:04b}, "
+            f"number_of_pieces={self.number_of_pieces})"
+        )
+        
     def add_piece(self, piece: int) -> None:
         self.cumulative_bit_and &= piece
         self.cumulative_bit_or |= piece
@@ -108,7 +116,15 @@ class GameState:
                 formatted_row.append(f"{cell_str:>6}")  # Right-align with 6 character width
             print(" ".join(formatted_row))
     
-    
+    # for debug usage
+    def print_line_data(self) -> None:
+        for i, line_data in enumerate(self.columns_data):
+            print(f"Column {i}: {line_data}")
+        for i, line_data in enumerate(self.rows_data):
+            print(f"Row {i}: {line_data}")
+        for i, line_data in enumerate(self.diagonals_data):
+            print(f"Diagonal {i}: {line_data}")
+
     def format_piece(self, piece_index: int) -> str:
         format_str: str
         if self.piece_format_mode == PieceFormatMode.BINARY:
@@ -122,16 +138,6 @@ class GameState:
     
     def print_available_pieces(self) -> None:
         print("Available pieces:", ", ".join(self.format_piece(i) for i in range(NUM_PIECES) if self.pieces[i] == 0))
-
-    # for debug usage
-    # TODO: Consider implementing __repr__, or a debug method on each class (particularly LineData)
-    def dump_line_data(self) -> None:
-        for i, line_data in enumerate(self.columns_data):
-            print(f"Column {i}: {format(line_data.cumulative_bit_and, '04b')}, {format(line_data.cumulative_bit_or, '04b')}, pieces: {line_data.number_of_pieces}")
-        for i, line_data in enumerate(self.rows_data):
-            print(f"Row {i}: {format(line_data.cumulative_bit_and, '04b')}, {format(line_data.cumulative_bit_or, '04b')}, pieces: {line_data.number_of_pieces}")
-        for i, line_data in enumerate(self.diagonals_data):
-            print(f"Diagonal {i}: {format(line_data.cumulative_bit_and, '04b')}, {format(line_data.cumulative_bit_or, '04b')}, pieces: {line_data.number_of_pieces}")
 
 class GameEngine:
     def __init__(self) -> None:
