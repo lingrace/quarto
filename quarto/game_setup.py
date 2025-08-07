@@ -42,8 +42,6 @@ class GameState:
         self.pieces: bitarray = bitarray(NUM_PIECES)
         # Note that keeping the board state is not necessary to check the win conditions. We retain the board purely for display purposes.
         self.board: List[List[Optional[int]]] = [[None for _ in range(EDGE_SIZE)] for _ in range(EDGE_SIZE)]  
-
-        # Make player an enum here, so it can be re-used between here and winner
         self.current_player: Player =  Player.PLAYER_1
         self.selected_piece: Optional[int] = None 
         self.columns_data: List[LineData] = [LineData() for _ in range(EDGE_SIZE)]
@@ -113,7 +111,7 @@ class GameState:
         print("Available pieces:", ", ".join(self.format_piece(i) for i in range(NUM_PIECES) if self.pieces[i] == 0))
 
     # for debug usage
-    # Consider implementing __repr__, or a debug method on each class (particularly LineData)
+    # TODO: Consider implementing __repr__, or a debug method on each class (particularly LineData)
     def dump_line_data(self) -> None:
         for i, line_data in enumerate(self.columns_data):
             print(f"Column {i}: {format(line_data.cumulative_bit_and, '04b')}, {format(line_data.cumulative_bit_or, '04b')}, pieces: {line_data.number_of_pieces}")
@@ -178,8 +176,7 @@ class GameEngine:
     def print_game_instructions(self) -> None:
        print(INSTRUCTIONS)
 
-    def select_piece(self) -> None:
-        # make private
+    def _select_piece(self) -> None:
         while True:
             try:
                 self.game_state.print_available_pieces()
@@ -192,7 +189,7 @@ class GameEngine:
             except ValueError as e:
                 print(e)
 
-    def place_piece(self) -> None:
+    def _place_piece(self) -> None:
         while True:
             try:
                 self.game_state.print_board()
@@ -207,7 +204,7 @@ class GameEngine:
         self.game_state.place_piece(row, col)
         self.game_state.print_board()
 
-    def init_game_state(self, player_1_name: str, player_2_name: str) -> None:
+    def _init_game_state(self, player_1_name: str, player_2_name: str) -> None:
         while True:
             piece_format_mode_input = input("Enter the format of the pieces (binary or decimal): ").lower().strip()
             try:
@@ -221,12 +218,12 @@ class GameEngine:
             self.game_state = GameState(player_1_name, player_2_name, piece_format_mode)
     
     def run_game(self,  player_1_name: str, player_2_name: str) -> None:
-        self.init_game_state(player_1_name, player_2_name)
+        self._init_game_state(player_1_name, player_2_name)
         # This game loop follows the lifecycle of a piece, not a player
         while not self.game_state.is_game_over():
-            self.select_piece()
+            self._select_piece()
             self.game_state.switch_player()
-            self.place_piece()
+            self._place_piece()
             if self.game_state.winner is not None:
                 self.game_state.print_board()
                 print(f"Game over! {self.game_state.get_current_player_name()} wins!")
